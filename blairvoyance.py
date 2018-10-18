@@ -70,8 +70,8 @@ class PollAggregator:
 
 print("Libraries loaded")
 
-districts = list(pd.read_csv('districts.csv', header=None).iloc[:,0])
-poll_df = pd.read_excel('PoliStat polls (Responses).xlsx', sheet='Form Responses 1')
+districts = list(pd.read_csv('district_input.csv').iloc[:,0])
+poll_df = pd.read_csv('poll_input.csv')
 
 polls = {district: PollAggregator() for district in districts}
 vanilla_weights = {district: [] for district in districts}
@@ -79,22 +79,22 @@ vanilla_weights = {district: [] for district in districts}
 print("Poll computation ready")
 
 for index, row in poll_df.iterrows():
-    name = row['District Name (e.g. AZ-03, WA-11)']
-    dem = row['Democratic percent (Not margin, not 2-party)']
-    repub = row['Republican percent (Not margin, not 2-party)']
+    name = row['district_name']
+    dem = row['dem_percent']
+    repub = row['rep_percent']
     val = dem / (dem + repub)
-    grade = row['Pollster Grade https://projects.fivethirtyeight.com/pollster-ratings/ (Put D if N/A)']
+    grade = row['pollster_grade']
     
-    year = int(str(row['Final date taken']).split(' ')[0].split('-')[0])
-    month = int(str(row['Final date taken']).split(' ')[0].split('-')[1])
-    day = int(str(row['Final date taken']).split(' ')[0].split('-')[2])
+    year = int(str(row['date']).split('/')[2])
+    month = int(str(row['date']).split('/')[0])
+    day = int(str(row['date']).split('/')[1])
     d0 = date(year, month, day)
     d1 = date(2018, 11, 6)
     days = d1 - d0
     days = days.days
     
     nw = np.exp(days / 30)
-    nsamp = row['Sample Size']
+    nsamp = row['sample_size']
     
     polls[name].update(val, grade, nsamp, days)
     vanilla_weights[name].append(np.exp(days / 167) * WEIGHTS[grade])
@@ -125,8 +125,8 @@ with open('ppoll.csv', 'w') as f:
 print("Polls written")            
 
 pp = pd.read_csv('ppoll.csv', header=None)
-bf = pd.read_csv('big_fun.csv')
-df = pd.read_excel('handmod.xlsx', sheet='Sheet 1', header=None)
+# bf = pd.read_csv('big_fun.csv')
+df = pd.read_csv("demographics.csv", header=None)
 
 ins = ['S' + str(rep).zfill(3) for rep in range(df.shape[1])]
 outs = ['MRAM']
