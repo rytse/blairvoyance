@@ -47,9 +47,9 @@ class PollAggregator:
         self.poll_vals.append(val)
         self.poll_sizes.append(nsamp)
         
-        #pvs = np.array(self.poll_vals)
-        #pss = np.array(self.poll_sizes)
-        #stdev_shift = np.mean(np.sqrt(pvs * (1 - pvs) / pss))
+        pvs = np.array(self.poll_vals)
+        pss = np.array(self.poll_sizes)
+        stdev_shift = np.mean(np.sqrt(pvs * (1 - pvs) / pss))
         
         stdev = np.sqrt(val * (1 - val) / nsamp) #+ 0.01 / WEIGHTS[grade] - stdev_shift
         
@@ -196,15 +196,15 @@ print('Mean Absolute Prediction Error: ' + str(np.mean(np.abs(er_all))))
 print('Mean Prediction Error: ' + str(np.mean(er_all)))
 print('Stdev Prediction Error: ' + str(np.std(er_all)))
 
-plt.hist(er_all)
-plt.xlabel('Error')
-plt.ylabel('Frequency')
-plt.title('Prediction Error (Histogram)')
-plt.show()
+#plt.hist(er_all)
+#plt.xlabel('Error')
+#plt.ylabel('Frequency')
+#plt.title('Prediction Error (Histogram)')
+#plt.show()
 
-res = stats.probplot(er_all, plot=plt)
-plt.title('Prediction Error (Normal Probability Plot)')
-plt.show()
+#res = stats.probplot(er_all, plot=plt)
+#plt.title('Prediction Error (Normal Probability Plot)')
+#plt.show()
 
 ers = []
 names = []
@@ -237,6 +237,7 @@ for index, row in raw.iterrows():
 #     y_pred.append(interpout + bf['Fund only'].iloc[index])
     y_pred.append(interpout + 0.5)
 
-np.savetxt('out.csv', np.array(y_pred), delimiter=',')
+out_df = pd.DataFrame({'district_name': districts, 'bv': y_pred})
+out_df.to_csv('bv_out.csv', index=False)
 
 print(np.sum(np.array(y_pred) > .50) / len(y_pred))
