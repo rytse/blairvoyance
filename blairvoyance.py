@@ -51,7 +51,7 @@ class PollAggregator:
         pss = np.array(self.poll_sizes)
         stdev_shift = np.mean(np.sqrt(pvs * (1 - pvs) / pss))
         
-        stdev = np.sqrt(val * (1 - val) / nsamp) #+ 0.01 / WEIGHTS[grade] - stdev_shift
+        stdev = np.sqrt(val * (1 - val) / nsamp) + 0.01 / WEIGHTS[grade] - stdev_shift
         
         data = 0, stdev, val
         self.data.add(data)
