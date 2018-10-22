@@ -1,3 +1,5 @@
+data/
+
 MANIFEST
 build
 dist
@@ -39,3 +41,7 @@ config.rst
 /.pydevproject
 
 package-lock.json
+
+Pipfile.lock
+bv_out.csv
+ppoll.csv
