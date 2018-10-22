@@ -2,11 +2,12 @@ import pandas as pd
 import numpy as np
 import scipy.cluster
 import scipy.interpolate
-from scipy import stats
-from sklearn.metrics import mean_squared_error as mse, mean_absolute_error as mae
+# from scipy import stats
+# from sklearn.metrics import mean_squared_error as mse, mean_absolute_error as mae
 import matplotlib.pyplot as plt
 from datetime import date
 import thinkbayes2
+import datapull
 
 plt.style.use('ggplot')
 
@@ -31,6 +32,7 @@ class Electorate(thinkbayes2.Suite):
         error = result - hypo
         like = thinkbayes2.EvalNormalPdf(error, bias, std)
         return like
+
 
 class PollAggregator:
     '''Estimator of the poll distributions'''
@@ -68,10 +70,10 @@ class PollAggregator:
         pmf = np.array(list(self.suite.Items()))
         return np.dot(pmf[:,0], pmf[:,1])
 
-print("Libraries loaded")
+print('Libraries loaded')
 
-districts = list(pd.read_csv('district_input.csv').iloc[:,0])
-poll_df = pd.read_csv('poll_input.csv')
+districts = list(pd.read_csv('./data/district_input.csv').iloc[:,0])
+poll_df = pd.read_csv('./data/poll_input.csv')
 
 polls = {district: PollAggregator() for district in districts}
 vanilla_weights = {district: [] for district in districts}
@@ -99,14 +101,14 @@ for index, row in poll_df.iterrows():
     polls[name].update(val, grade, nsamp, days)
     vanilla_weights[name].append(np.exp(days / 167) * WEIGHTS[grade])
 
-print("Polls processed")
+print('Polls processed')
 
 for d in polls:
     if len(polls[d].poll_vals) > 0:
         polls[d].run_suite()
-        print("run" + d)
+        print('run' + d)
 
-print("Bayesian model run")
+print('Bayesian model run')
 
 for vw in vanilla_weights:
     if len(vanilla_weights[vw]) > 0:
@@ -114,7 +116,7 @@ for vw in vanilla_weights:
     else:
         vanilla_weights[vw] = 0
         
-with open('ppoll.csv', 'w') as f:
+with open('./data/ppoll.csv', 'w') as f:
     for poll in polls:
         if len(polls[poll].poll_vals) > 0:
             f.write(poll + ',' + str((polls[poll].e_val() - 0.5) * 100) + '\n')
@@ -124,9 +126,9 @@ with open('ppoll.csv', 'w') as f:
 
 print("Polls written")            
 
-pp = pd.read_csv('ppoll.csv', header=None)
+pp = pd.read_csv('./data/ppoll.csv', header=None)
 # bf = pd.read_csv('big_fun.csv')
-df = pd.read_csv("demographics.csv", header=None)
+df = pd.read_csv('./data/demographics.csv', header=None)
 
 ins = ['S' + str(rep).zfill(3) for rep in range(df.shape[1])]
 outs = ['MRAM']
@@ -147,7 +149,7 @@ df['MRAM'] = (50 + df['Tmp']) / 100 - 0.5
 df = df[df['Tmp'] != 0]
 df = df[df['Name'].str.get(0) + df['Name'].str.get(1) != 'PA']
 
-print("Data loaded")
+print('Data loaded')
 
 def gen_interpolator(df_train, _ins, _outs):
     inrep = [np.array(df_train[rep]).astype(float) for rep in _ins]
